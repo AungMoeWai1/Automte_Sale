@@ -1,0 +1,41 @@
+<odoo>
+    <record id="view_custom_sale_order_form1" model="ir.ui.view">
+        <field name="name">custom.sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add a new Confirm and Check Stock button -->
+            <xpath expr="//button[@name='action_confirm']" position="replace">
+                <button id="automate_validate_order"
+                        string="Confirm and Check Stock"
+                        type="object"
+                        name="automate_validate_order"
+                        class="btn-primary"
+                        context="{'validate_analytic': True}"
+                        invisible="state != 'sent'"/>
+                <button string="Confirm and Check Stock"
+                        type="object"
+                        name="automate_validate_order"
+                        context="{'validate_analytic': True}"
+                        invisible="state != 'draft'"/>
+            </xpath>
+            <!-- Journal selection field adding in the Other Info page -->
+            <xpath expr="//group[@name='sales_person']/field[@name='tag_ids']" position="after">
+                <label name="payment_journal_sale_order_label" for="payment_journal_id" string="Journal"/>
+                <field name="payment_journal_id" nolabel="1"
+                       placeholder="Select a journal"
+                       options="{'no_create': True}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ACTIONS (SERVER) -->
+    <record id="action_sale_order_automate" model="ir.actions.server">
+        <field name="name">Automate Sale Orders</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code">env['sale.order'].browse(env.context.get('active_ids')).automate_validate_order()</field>
+    </record>
+</odoo>
